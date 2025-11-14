@@ -1,0 +1,480 @@
+<!-- 
+# Frontend (HTML + JS + CSS)
+ -->
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>FGI Stock Predictor</title>
+    <!--<link rel="preconnect" href="https://developers.google.com/fonts">-->
+    <a
+      href=" https://www.investing.com/equities/fgi-industries-consensus-estimates"
+    ></a>
+
+    <a
+      href="https://in.tradingview.com/symbols/NASDAQ-FGI/forecast/ "
+      crossorigin
+    ></a>
+   
+    <a
+      hres=" https://inventiconasia.com/blank/FGI-Industries-Ltd.-Stock-Analysis-and-Forecast "
+      rel="styleheet"
+    ></a>
+
+    <style>
+      :root {
+        --bg: #0b1020;
+        --card: #121a35;
+        --muted: #a5b3d8;
+        --text: #e8edff;
+        --accent: #7c9bff;
+        --ok: #22c55e;
+        --warn: #eab308;
+        --err: #ef4444;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: linear-gradient(120deg, #0b1020, #0f1430 60%, #0b1020);
+        font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+        color: var(--text);
+      }
+      .container {
+        max-width: 1100px;
+        margin: 40px auto;
+        padding: 0 16px;
+      }
+      .card {
+        background: var(--card);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+      }
+      header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 20px 24px;
+      }
+      h1 {
+        margin: 0;
+        font-size: 22px;
+        letter-spacing: 0.5px;
+      }
+      .badge {
+        background: rgba(124, 155, 255, 0.15);
+        padding: 6px 10px;
+        border-radius: 999px;
+        color: var(--accent);
+        font-size: 12px;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: 1.2fr 0.8fr;
+        gap: 16px;
+      }
+      @media (max-width: 920px) {
+        .grid {
+          grid-template-columns: 1fr;
+        }
+      }
+      .section {
+        padding: 16px 24px 24px;
+      }
+      label {
+        display: block;
+        font-size: 12px;
+        color: var(--muted);
+        margin-bottom: 6px;
+      }
+      input,
+      select,
+      button,
+      textarea {
+        width: 100%;
+        padding: 12px 14px;
+        border-radius: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        background: #0c1330;
+        color: var(--text);
+        outline: none;
+      }
+      input:focus,
+      select:focus,
+      textarea:focus {
+        border-color: var(--accent);
+      }
+      button {
+        cursor: pointer;
+        background: linear-gradient(135deg, #5e7bff, #7c9bff);
+        border: none;
+        font-weight: 600;
+        letter-spacing: 0.3px;
+        transition: 0.2s;
+      }
+      button:hover {
+        transform: translateY(-1px);
+      }
+      .row {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 12px;
+      }
+      @media (max-width: 720px) {
+        .row {
+          grid-template-columns: 1fr 1fr;
+        }
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      th,
+      td {
+        padding: 10px 12px;
+        border-bottom: 1px dashed rgba(255, 255, 255, 0.08);
+        font-size: 13px;
+      }
+      th {
+        text-align: left;
+        color: var(--muted);
+        font-weight: 600;
+      }
+      .pill {
+        display: inline-block;
+        padding: 4px 8px;
+        border-radius: 999px;
+        font-size: 12px;
+      }
+      .ok {
+        background: rgba(34, 197, 94, 0.15);
+        color: #86efac;
+      }
+      .warn {
+        background: rgba(234, 179, 8, 0.15);
+        color: #fde68a;
+      }
+      .err {
+        background: rgba(239, 68, 68, 0.15);
+        color: #fecaca;
+      }
+      .small {
+        font-size: 12px;
+        color: var(--muted);
+      }
+      .muted {
+        color: var(--muted);
+      }
+      .footer {
+        padding: 16px 24px;
+        color: var(--muted);
+        font-size: 12px;
+      }
+      .spin {
+        width: 14px;
+        height: 14px;
+        border: 2px solid rgba(255, 255, 255, 0.25);
+        border-top-color: #fff;
+        border-radius: 50%;
+        display: inline-block;
+        animation: spin 0.9s linear infinite;
+        margin-right: 8px;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      canvas {
+        width: 100% !important;
+        height: 280px !important;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="card">
+        <header>
+          <h1>FGI Stock Predictor</h1>
+          <span class="badge">Demo • ARIMA + Random Forest + FGI</span>
+        </header>
+        <div class="section grid">
+          <div>
+            <div class="row">
+              <div>
+                <label
+                  >Tickers (comma-separated, e.g., AAPL, RELIANCE.NS,
+                  TSLA)</label
+                >
+                <input id="tickers" placeholder="AAPL, RELIANCE.NS" />
+              </div>
+              <div>
+                <label>From (YYYY-MM-DD)</label>
+                <input id="from" type="date" />
+              </div>
+              <div>
+                <label>To (YYYY-MM-DD)</label>
+                <input id="to" type="date" />
+              </div>
+              <div>
+                <label>Horizon (days ahead)</label>
+                <select id="horizon">
+                  <option value="1">1</option>
+                  <option value="5">5</option>
+                  <option value="10">10</option>
+                </select>
+              </div>
+            </div>
+            <div style="margin-top: 12px; display: flex; gap: 10px">
+              <button id="predictBtn">Predict</button>
+              <button id="loadFgiBtn" style="background: #2f3966">
+                Load FGI
+              </button>
+            </div>
+            <p class="small" style="margin-top: 8px">
+              Tip: Indian tickers use <code>.NS</code> (e.g., RELIANCE.NS).
+              Prices shown in INR columns are converted using latest FX.
+            </p>
+            <div id="status" class="small" style="margin-top: 8px"></div>
+            <div style="margin-top: 18px; overflow: auto">
+              <table id="resultsTable" style="display: none">
+                <thead>
+                  <tr>
+                    <th>Ticker</th>
+                    <th>Currency</th>
+                    <th>From</th>
+                    <th>To</th>
+                    <th>Horizon</th>
+                    <th>Last Close (Local)</th>
+                    <th>Last Close (INR)</th>
+                    <th>Pred Next (Local)</th>
+                    <th>Pred Next (INR)</th>
+                    <th>MAPE %</th>
+                    <th>Accuracy %</th>
+                    <th>Note</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+          <div>
+            <label>Fear & Greed Index (FGI) — selected range</label>
+            <div class="card" style="padding: 12px">
+              <canvas id="fgiChart"></canvas>
+            </div>
+            <p class="small" style="margin-top: 6px">
+              If chart is empty, click <b>Load FGI</b> after choosing a date
+              range.
+            </p>
+          </div>
+        </div>
+        <div class="footer">
+          No model can guarantee 100% accuracy. Use responsibly.
+        </div>
+      </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+      const statusEl = document.getElementById("status");
+      const resultsTable = document.getElementById("resultsTable");
+      const tbody = resultsTable.querySelector("tbody");
+      function setStatus(msg, loading = false) {
+        statusEl.innerHTML = loading ? `<span class="spin"></span>${msg}` : msg;
+      }
+
+      async function callPredict() {
+        const tickers = document
+          .getElementById("tickers")
+          .value.split(",")
+          .map((s) => s.trim())
+          .filter(Boolean);
+        const from = document.getElementById("from").value || null;
+        const to = document.getElementById("to").value || null;
+        const horizon = document.getElementById("horizon").value;
+
+        if (!tickers.length) {
+          alert("Please enter at least one ticker");
+          return;
+        }
+        setStatus(
+          "Predicting… this may take ~10–30s depending on tickers.",
+          true
+        );
+        resultsTable.style.display = "none";
+        tbody.innerHTML = "";
+        try {
+          const res = await fetch("/api/predict", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              tickers,
+              start: from,
+              end: to,
+              horizon: parseInt(horizon),
+            }),
+
+            //   .then(res => res.json())
+            //   .then(data => {
+            //    console.log("prediction result: " , data);
+            //    })
+            //    .catch(err => coerror("Error: ",err))
+          });
+          fetch("data.json")
+            .then((response) => {
+              if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+              }
+              return response.json();
+            })
+            .then((data) => {
+              console.log(data);
+            })
+            .catch((error) => {
+              console.error("Error fetching JSON:", error);
+            });
+
+          //
+          fetch("/api/fgi?start=2025-08-18&end=2025-08-24")
+            .then((response) => response.json())
+            .then((data) => console.log(data));
+   
+
+
+          fetch("/api/fgi?start=2025-08-18&end=2025-08-24")
+            .then((response) => {
+              if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+              }
+              return response.json();
+            })
+            .then((data) => console.log(data))
+            .catch((error) => console.error("Fetch error:", error));
+
+
+          //
+
+          // fetch('data.json')
+          //   .then(res => {
+          //     if (!res.ok) {
+          //       throw new Error(`HTTP error! Status: ${res.status}`);
+          //     }
+          //     return res.json();
+          //   })
+          //   .then(data => {
+          //     // use data
+          //   })
+          //   .catch(err => {
+          //     console.error('Error fetching JSON:', err);
+          //   });
+
+          const data = await res.json();
+          if (!Array.isArray(data)) {
+            throw new Error(data.error || "Unexpected response");
+          }
+          for (const row of data) {
+            const tr = document.createElement("tr");
+            function td(v) {
+              const el = document.createElement("td");
+              el.textContent = v === undefined || v === null ? "" : v;
+              return el;
+            }
+            tr.appendChild(td(row.Ticker));
+            tr.appendChild(td(row.Currency));
+            tr.appendChild(td(row.From));
+            tr.appendChild(td(row.To));
+            tr.appendChild(td(row.Horizon_Days));
+            tr.appendChild(td(row.Last_Close_Local));
+            tr.appendChild(td(row.Last_Close_INR));
+            tr.appendChild(td(row.Predicted_Next_Close_Local));
+            tr.appendChild(td(row.Predicted_Next_Close_INR));
+            tr.appendChild(td(row.MAPE));
+            tr.appendChild(td(row.Accuracy));
+            tr.appendChild(td(row.Note));
+            tbody.appendChild(tr);
+          }
+          resultsTable.style.display = "";
+          setStatus("Done.");
+        } catch (err) {
+          //  console.error(err);
+          setStatus("Error: " + err.message);
+        }
+      }
+
+      let fgiChart;
+      async function loadFgi() {
+        const from = document.getElementById("from").value || "";
+        const to = document.getElementById("to").value || "";
+        setStatus("Loading FGI…", true);
+        try {
+          const params = new URLSearchParams();
+          if (from) params.set("start", from);
+          if (to) params.set("end", to);
+          const res = await fetch("/api/fgi?" + params.toString());
+          const data = await res.json();
+          if (Array.isArray(data)) {
+            const labels = data.map((d) => d.date);
+            const values = data.map((d) => d.FGI);
+            if (fgiChart) {
+              fgiChart.destroy();
+            }
+            const ctx = document.getElementById("fgiChart").getContext("2d");
+            fgiChart = new Chart(ctx, {
+              type: "line",
+              data: {
+                labels,
+                datasets: [
+                  { label: "Fear & Greed Index", data: values, fill: false },
+                ],
+              },
+              options: {
+                plugins: { legend: { labels: { color: "#cbd5e1" } } },
+                scales: {
+                  x: { ticks: { color: "#a5b3d8" } },
+                  y: {
+                    ticks: { color: "#a5b3d8" },
+                    suggestedMin: 0,
+                    suggestedMax: 100,
+                  },
+                },
+              },
+            });
+            setStatus("FGI loaded.");
+          } else {
+            throw new Error(data.error || "Failed to load FGI");
+          }
+        } catch (err) {
+          // console.error(err );
+          setStatus("Error: " + err.message);
+
+           fetch('http://127.0.0.1:5500/api/fgi?start=2025-08-18&end=2025-08-24')
+          // .then(response => {
+          //   if (!response.ok) {
+          //     throw new Error(`HTTP error! status: ${response.status}`);
+          //   }
+          //   return response.json();
+          // })
+          // .then(data => console.log(data))
+           .catch(error => console.error('Fetch error:', error));
+
+        }
+      }
+
+      document
+        .getElementById("predictBtn")
+        .addEventListener("click", callPredict);
+      document.getElementById("loadFgiBtn").addEventListener("click", loadFgi);
+    </script>
+  </body>
+</html>
+
+
+
+
+<!-- """
+if __name__ == "__main__":
+    app.run(debug=True) -->
