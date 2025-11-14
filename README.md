@@ -53,9 +53,12 @@ The project folder name is **`Project`**.
 
 
 
-
+cd.
 Ticker: AAPL
+
 Last Close Price: $182.34
+
 Predicted Next Day Price: $184.10
+
 Accuracy: 96.42%
 
