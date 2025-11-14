@@ -53,7 +53,7 @@ The project folder name is **`Project`**.
 
 
 
-cd.
+
 Ticker: AAPL
 
 Last Close Price: $182.34
